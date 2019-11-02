@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC  
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+   
+<mapper namespace="com.fh.shop.mapper.type.ITypeMapper">
+
+
+
+    <insert id="addType">
+        <selectKey keyProperty="id" resultType="long" order="AFTER">
+            select last_insert_id();
+        </selectKey>
+        insert into t_type (name,pid) values(#{name},#{pId})
+    </insert>
+
+    <select id="selectList" resultType="com.fh.shop.po.type.Type">
+        select * from t_type
+    </select>
+
+    <select id="findAllById" resultType="com.fh.shop.po.type.Type">
+        select * from t_type  where id= #{id}
+    </select>
+
+    <update id="updateById">
+        update  t_type set name=#{name} where id=#{id}
+    </update>
+
+    <delete id="deleteBatchIds">
+        delete from t_resource where id in
+        <foreach collection="list" item="list" open="(" close=")"  separator=",">
+            #{list}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>商品信息</title>
+</head>
+<body>
+<h1 style="color: #af0000">商品信息</h1>
+
+< border="1px" cellspacing="0px">
+    <tr>
+    <th>商品名</th>
+    <th>价格</th>
+    <th>库存</th>
+    </tr>
+    <#list products as product>
+    <tr>
+        <td>${product.productName}</td>
+        <td><font style="color: #af0000">${product.price}</font></td>
+        <td>${product.stock}</td>
+    </tr>
+    </#list>
+</table>
+
+</body>
+</html>

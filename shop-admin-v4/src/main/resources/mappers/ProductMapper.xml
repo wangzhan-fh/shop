@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC  
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+   
+<mapper namespace="com.fh.shop.mapper.product.IProductMapper">
+    <sql id="product">
+        <where>
+            <if test=" productName !=null and productName !='' ">
+                productName like CONCAT(CONCAT('%',#{productName}),'%')
+            </if>
+            <if test=" price !=null and price !='' ">
+                and price like CONCAT(CONCAT('%',#{price}),'%')
+            </if>
+            <if test=" minTime !=null and minTime !='' ">
+                and producedDate >= #{minTime}
+            </if>
+            <if test=" maxTime !=null and maxTime >=minTime ">
+                and producedDate &lt;= #{maxTime}
+            </if>
+            <if test="brandId !=null and brandId >-1">
+                and brandId =#{brandId}
+            </if>
+        </where>
+    </sql>
+
+    <!--查询总条数-->
+    <select id="findProductByCount" parameterType="com.fh.shop.po.product.Product" resultType="java.lang.Long">
+        select count(*) from t_product p left join t_brand b on p.brandid=b.id
+        <include refid="product"></include>
+    </select>
+    <!--查询本页数据-->
+    <select id="productList" resultType="com.fh.shop.po.product.Product">
+        select t.* from (
+            select p.id "id",productName,price,mainImagePath,producedDate,hotProduct,stock,shelves,brandName
+            from t_product p left join t_brand b on p.brandid=b.id
+        <include refid="product"></include>
+            order by id desc
+        )t
+        limit #{start},#{length}
+    </select>
+    <!--添加商品-->
+    <insert id="add" parameterType="com.fh.shop.po.product.Product">
+        insert into t_product(productName,price,mainImagePath,producedDate,stock,shelves,hotProduct,brandid)
+        values (#{productName},#{price},#{mainImagePath},#{producedDate},#{stock},#{shelves},#{hotProduct},#{brandId})
+    </insert>
+    <!--删除商品-->
+    <delete id="deleteProduct" parameterType="java.lang.Integer">
+        delete from t_product where id = #{id}
+    </delete>
+    <!--回显-->
+    <select id="toUpdateProduct"  resultType="com.fh.shop.po.product.Product">
+        select id,productName,price,mainImagePath,producedDate,hotProduct,stock,shelves,brandId
+        from t_product where id = #{id}
+    </select>
+    <!--修改-->
+    <update id="updateProduct" parameterType="com.fh.shop.po.product.Product">
+        update t_product set productName=#{productName},price = #{price}
+        ,mainImagePath=#{mainImagePath},producedDate=#{producedDate},stock=#{stock},hotProduct=#{hotProduct},brandId=#{brandId}
+        where id = #{id}
+    </update>
+
+    <update id="updateByShelves">
+          update t_product set shelves=#{shelves}
+        where id = #{id}
+    </update>
+
+    <select id="productParamList" resultType="com.fh.shop.po.product.Product">
+        select id,productName,price,mainImagePath,producedDate,hotProduct,stock,shelves
+        from t_product
+        <where>
+            <if test=" productName !=null and productName !='' ">
+                productName like CONCAT(CONCAT('%',#{productName}),'%')
+            </if>
+            <if test=" price !=null and price !='' ">
+                and price like CONCAT(CONCAT('%',#{price}),'%')
+            </if>
+            <if test=" minTime !=null and minTime !='' ">
+                and producedDate >= #{minTime}
+            </if>
+            <if test=" maxTime !=null and maxTime >=minTime ">
+                and producedDate &lt;= #{maxTime}
+            </if>
+        </where>
+
+    </select>
+</mapper>
