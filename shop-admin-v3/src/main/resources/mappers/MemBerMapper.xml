@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC  
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+   
+<mapper namespace="com.fh.shop.mapper.member.IMemberMapper">
+    <sql id="logwhere">
+        <where>
+            <if test="memberName != null and memberName !=''">
+                and memberName like  CONCAT(CONCAT('%',#{memberName},'%'))
+            </if>
+            <if test="realName != null and realName !=''">
+                and realName  like CONCAT(CONCAT('%',#{realName},'%'))
+            </if>
+
+            <if test="minTime != null ">
+                and birthday >=  #{minTime}
+            </if>
+            <if test="maxTime !=null">
+                and birthday &lt;=  #{maxTime}
+            </if>
+            <if test="a1 !=null and a1!=-1">
+                and provinceId =  #{a1}
+            </if>
+            <if test="a2 !=null and a2!=-1">
+                and cityId =  #{a2}
+            </if>
+            <if test="a3 !=null and a3!=-1">
+                and countyId =  #{a3}
+            </if>
+
+        </where>
+
+    </sql>
+
+
+    <select id="findCount" resultType="long">
+        select count(*) from t_member
+        <include refid="logwhere"></include>
+    </select>
+    <select id="findList" resultType="com.fh.shop.po.member.Member">
+        select t.* from (
+        select MEMBERName,realName,BIRTHDAY,phone,email,concat(a1.name,'-->',a3.name,'-->',a2.name) "areaName" from t_member u
+        left join t_area a1 on a1.id =u.provinceId
+        left join t_area a2 on a2.id =u.countyId
+        left join t_area a3 on a3.id =u.cityId
+        <include refid="logwhere"></include>
+        )t limit #{start},#{length}
+    </select>
+
+</mapper>

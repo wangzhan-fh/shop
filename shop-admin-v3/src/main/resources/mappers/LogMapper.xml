@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC  
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+   
+<mapper namespace="com.fh.shop.mapper.log.ILogMapper">
+    <sql id="logwhere">
+        <where>
+            <if test="userName != null and userName !=''">
+                and userName like  CONCAT(CONCAT('%',#{userName},'%'))
+            </if>
+            <if test="realName != null and realName !=''">
+                and realName  like CONCAT(CONCAT('%',#{realName},'%'))
+            </if>
+            <if test="content != null and content !=''">
+                and content like  CONCAT(CONCAT('%',#{content},'%'))
+            </if>
+            <if test="status != null and status > -1">
+                and status = #{status}
+            </if>
+            <if test="minTime != null ">
+                and currDate >=  #{minTime}
+            </if>
+            <if test="maxTime !=null">
+                and currDate &lt;=  #{maxTime}
+            </if>
+
+        </where>
+
+    </sql>
+    <insert id="addLog">
+        insert into t_log_info (userName,realName,status,currDate,info,errorMsg,detail,content)
+        values (#{userName},#{realName},#{status},#{currDate},#{info},#{errorMsg},#{detail},#{content})
+    </insert>
+
+    <select id="findCount" resultType="long">
+        select count(*) from t_log_info
+        <include refid="logwhere"></include>
+    </select>
+    <select id="findList" resultType="com.fh.shop.po.log.LogInfo">
+        select t.* from (
+        select id,userName,realName,status,currDate,info,errorMsg,detail,content from t_log_info
+        <include refid="logwhere"></include>
+        order by id desc
+        )t limit #{start},#{length}
+    </select>
+
+</mapper>

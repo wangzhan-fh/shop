@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC  
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+   
+<mapper namespace="com.fh.shop.mapper.product.IProductMapper">
+    <sql id="productwhere">
+        <where>
+            <if test=" productName !=null and productName !='' ">
+                productName like CONCAT(CONCAT('%',#{productName}),'%')
+            </if>
+            <if test=" price !=null and price !='' ">
+                and price like CONCAT(CONCAT('%',#{price}),'%')
+            </if>
+            <if test=" minTime !=null ">
+                and producedDate >= #{minTime}
+            </if>
+            <if test=" maxTime !=null ">
+                and producedDate &lt;= #{maxTime}
+            </if>
+            <if test=" brandId !=null and brandId >-1 ">
+                and brandId = #{brandId}
+            </if>
+            <if test=" type1 !=null and type1 >-1 ">
+                and type1 = #{type1}
+            </if>
+            <if test=" type2 !=null and type2 >-1 ">
+                and type2 = #{type2}
+            </if>
+            <if test=" type3 !=null and type3 >-1 ">
+                and type3 = #{type3}
+            </if>
+
+        </where>
+    </sql>
+    <!--查询总条数-->
+    <select id="findProductByCount" parameterType="com.fh.shop.po.product.Product" resultType="java.lang.Long">
+        select count(*) from t_product p left join t_brand b on p.brandid=b.id
+        left join t_type t1 on t1.id = p.type1
+        left join t_type t2 on t2.id = p.type2
+        left join t_type t3 on t3.id = p.type3
+        <include refid="productwhere"></include>
+    </select>
+    <!--查询本页数据-->
+    <select id="productList"  resultType="com.fh.shop.po.product.Product">
+        select t.* from (
+            select p.id "id",productName,price,mainImagePath,producedDate,stock,shelves,hotProduct,brandName,concat(t1.name,'-->',t2.name,'-->',t3.name) "typeName"
+            from t_product p left join t_brand b on p.brandid=b.id
+            left join t_type t1 on t1.id = p.type1
+            left join t_type t2 on t2.id = p.type2
+            left join t_type t3 on t3.id = p.type3
+        <include refid="productwhere"></include>
+            order by id desc
+        )t
+        limit #{start},#{length}
+    </select>
+
+    <select id="selectByid"  resultType="com.fh.shop.po.product.Product">
+        select p.id "id",productName,price,mainImagePath,producedDate,brandId,stock,shelves,hotProduct,concat(t1.name,'-->',t2.name,'-->',t3.name) "typeName"
+            from t_product p
+            left join t_type t1 on t1.id = p.type1
+            left join t_type t2 on t2.id = p.type2
+            left join t_type t3 on t3.id = p.type3
+             where p.id = #{id}
+    </select>
+
+
+    <select id="productParamList" resultType="com.fh.shop.po.product.Product">
+        select p.id "id",productName,price,mainImagePath,producedDate,stock,shelves,hotProduct,brandName,concat(t1.name,'-->',t2.name,'-->',t3.name) "typeName"
+        from t_product p left join t_brand b on p.brandid=b.id
+        left join t_type t1 on t1.id = p.type1
+        left join t_type t2 on t2.id = p.type2
+        left join t_type t3 on t3.id = p.type3
+        <include refid="productwhere"></include>
+    </select>
+
+
+    <!--&lt;!&ndash;添加商品&ndash;&gt;
+    <insert id="add" parameterType="com.fh.shop.po.product.Product">
+        insert into t_product(productName,price,mainImagePath,producedDate,stock,shelves,hotProduct)
+        values (#{productName},#{price},#{mainImagePath},#{producedDate},#{stock},#{shelves},#{hotProduct})
+    </insert>
+    &lt;!&ndash;删除商品&ndash;&gt;
+    <delete id="deleteProduct" parameterType="java.lang.Integer">
+        delete from t_product where id = #{id}
+    </delete>
+    &lt;!&ndash;回显&ndash;&gt;
+    <select id="toUpdateProduct" parameterType="java.lang.Integer" resultType="com.fh.shop.po.product.Product">
+        select id,productName,price,mainImagePath,producedDate,stock,shelves,hotProduct
+        from t_product where id = #{id}
+    </select>
+    &lt;!&ndash;修改&ndash;&gt;
+    <update id="updateProduct" parameterType="com.fh.shop.po.product.Product">
+        update t_product set productName=#{productName},price = #{price}
+        ,mainImagePath=#{mainImagePath},producedDate=#{producedDate},stock=#{stock},hotProduct=#{hotProduct}
+        where id = #{id}
+    </update>
+
+    <update id="updateByShelves">
+         update t_product set shelves=#{shelves}
+        where id = #{id}
+    </update>-->
+</mapper>

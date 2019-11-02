@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC  
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+   
+<mapper namespace="com.fh.shop.mapper.brand.IBrandMapper">
+    <!--查询总条数-->
+    <select id="findBrandByCount" resultType="java.lang.Long">
+        select count(*) from t_brand
+    </select>
+    <!--查询当前页数据-->
+    <select id="findBrandByList" resultType="com.fh.shop.po.brand.Brand">
+        select t.* from (
+            select id,brandName,hotBrand,sort,logo from t_brand
+            order by hotBrand,sort desc,FIELD(brandName,#{brandName}) desc
+        )t
+        limit #{start},#{length}
+    </select>
+
+    <insert id="addBrand" parameterType="com.fh.shop.po.brand.Brand">
+        insert into t_brand (brandName)
+        values (#{brandName})
+    </insert>
+
+    <!--修改角色-->
+    <update id="updateBrand" parameterType="com.fh.shop.po.brand.Brand">
+        update t_brand
+        set brandName = #{brandName}
+        where id = #{id}
+    </update>
+
+    <!--回显角色-->
+    <select id="toUpdateBrand" parameterType="java.lang.Integer" resultType="com.fh.shop.po.brand.Brand">
+        select id,brandName from t_brand
+        where id = #{id}
+    </select>
+
+    <!--删除角色-->
+    <delete id="deleteBrand" parameterType="java.lang.Integer">
+        delete from t_brand
+        where id = #{id}
+    </delete>
+
+    <!--查询所有-->
+    <select id="findBrandCheckbox" resultType="com.fh.shop.po.brand.Brand">
+        select id,brandName from t_brand
+    </select>
+</mapper>

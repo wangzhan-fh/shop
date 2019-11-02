@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC  
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+   
+<mapper namespace="com.fh.shop.mapper.user.IUserMapper">
+
+	<sql id="userwhere">
+		<where>
+			<if test="userName != null and userName !=''">
+				and userName like  "%"#{userName}"%"
+			</if>
+			<if test="realName != null and realName !=''">
+				and realName  like "%"#{realName}"%"
+			</if>
+			<if test="minDate != null ">
+				and entryTime >=  #{minDate}
+			</if>
+			<if test="maxDate !=null and maxDate>=minDate">
+				and entryTime &lt;=  #{maxDate}
+			</if>
+			<if test="minPrice != null and minPrice >=0">
+				and pay >=  #{minPrice}
+			</if>
+			<if test="maxPrice!=null and maxPrice>=minPrice">
+				and pay &lt;=  #{maxPrice}
+			</if>
+			<if test="minAge != null and minAge >=0">
+				and age >=  #{minAge}
+			</if>
+			<if test="maxAge !=null and maxAge>=minAge">
+				and age &lt;=  #{maxAge}
+			</if>
+			<if test="size>0">
+				and id  in (
+				select userid from t_user_role where
+
+				roleid in
+				<foreach collection="idsList" item="list" open="(" close=")" separator=",">
+					#{list}
+				</foreach>
+
+				group by userid
+				having count(*)=#{size}
+				)
+			</if>
+
+			<if test="provinceId !=null and provinceId!=-1">
+				and provinceId =  #{provinceId}
+			</if>
+			<if test="cityId !=null and cityId!=-1">
+				and cityId =  #{cityId}
+			</if>
+			<if test="countyId !=null and countyId!=-1">
+				and countyId =  #{countyId}
+			</if>
+		</where>
+
+	</sql>
+	<!--<insert id="addUser" parameterType="com.fh.shop.po.user.User">
+		<selectKey keyProperty="id" resultType="long" order="AFTER">
+			select last_insert_id();
+		</selectKey>
+		insert into t_user (username,realname,password,age,sex,phone,email,pay,entryTime,photo,salt) values (#{userName},#{realName},#{password},#{age},#{sex},#{phone},#{email},#{pay},#{entryTime},#{photo},#{salt})
+	</insert>-->
+
+	<select id="findList" resultType="com.fh.shop.po.user.User">
+		SELECT t.* from (
+		select u.id "id",username,realname,age,sex,phone,email,pay,
+		entryTime,photo,errorTime,errorCount, concat(a1.name,'-->',a3.name,'-->',a2.name) "areaName" from t_user u
+		left join t_area a1 on a1.id =u.provinceId
+		left join t_area a2 on a2.id =u.countyId
+		left join t_area a3 on a3.id =u.cityId
+		 <include refid="userwhere"></include>
+		 order by id desc
+		)t
+		limit #{start},#{length}
+	</select>
+
+	<select id="findCount" resultType="java.lang.Long">
+		select count(*) from t_user
+		left join t_area a1 on a1.id =provinceId
+		left join t_area a2 on a2.id =countyId
+		left join t_area a3 on a3.id =cityId
+		<include refid="userwhere"></include>
+ 	</select>
+
+	<!--<delete id="deleteById" >
+		delete from t_user where id=#{id}
+	</delete>-->
+
+	<select id="queryById" resultType="com.fh.shop.po.user.User">
+	select u.id "id",username,realname,age,sex,phone,email,pay,
+		entryTime,photo,errorTime,errorCount, concat(a1.name,'-->',a3.name,'-->',a2.name) "areaName" from t_user u
+		left join t_area a1 on a1.id =u.provinceId
+		left join t_area a2 on a2.id =u.countyId
+		left join t_area a3 on a3.id =u.cityId
+		 where u.id =#{id}
+	</select>
+
+	<insert id="addUserRole" >
+		insert into t_user_role (userid,roleid) values (#{userId},#{roleId})
+	</insert>
+
+	<!--<update id="updateUser" >
+		update t_user set
+		<if test = "realName != null and realName !='' ">
+			realName=#{realName},
+		</if>
+		<if test = "phone != null and phone !='' ">
+			phone=#{phone},
+		</if>
+		<if test = "email != null and email !='' ">
+			email=#{email},
+		</if>
+		<if test = " sex !=null ">
+			sex=#{sex},
+		</if>
+		<if test = "age != null and age !='' ">
+			age=#{age},
+		</if>
+		<if test = "pay != null and pay !='' ">
+			pay=#{pay},
+		</if>
+		<if test = "entryTime != null  ">
+			entryTime=#{entryTime},
+		</if>
+		<if test = "photo != null and photo !='' ">
+			photo=#{photo},
+		</if>
+		<if test = "userName != null and userName!='' ">
+			userName=#{userName}
+		</if>
+
+		where id=#{id}
+	</update>-->
+
+	<select id="findRoleNames" resultType="string">
+		select roleName from t_role r left join  t_user_role ur on r.id=ur.roleId
+		where ur.userId=#{id}
+	</select>
+	<select id="findRoleId" resultType="int">
+		select roleId from t_user_role where userId=#{v}
+	</select>
+
+	<delete id="deleteRoleId">
+		delete from t_user_role where userId=#{id}
+	</delete>
+
+	<delete id="deleteRoleIds">
+		delete from t_user_role where userId in
+		<foreach collection="list" item="list" open="(" close=")" separator=",">
+			#{list}
+		</foreach>
+	</delete>
+
+
+<!--	<delete id="deleteIds">
+		delete from t_user where id in
+		<foreach collection="list" item="list" open="(" close=")" separator=",">
+		#{list}
+	</foreach>
+	</delete>-->
+
+	<select id="findByUserName" resultType="com.fh.shop.po.user.User">
+		select id,username,salt,realname,password,age,sex,phone,email,pay,entryTime,photo,loginTime,loginCount,errorCount,errorTime  from t_user where userName=#{userName}
+	</select>
+
+	<!--登录时间-->
+
+	<update id="addLoginTime">
+		update  t_user set loginTime = now(),loginCount=#{loginCount},errorCount=#{errorCount} where id =#{id}
+	</update>
+
+
+	<select id="saeshfindList" resultType="com.fh.shop.po.user.User">
+		select u.id "id",username,realname,age,sex,phone,email,pay,
+		entryTime,photo,errorTime,errorCount, concat(a1.name,'-->',a3.name,'-->',a2.name) "areaName" from t_user u
+		left join t_area a1 on a1.id =u.provinceId
+		left join t_area a2 on a2.id =u.countyId
+		left join t_area a3 on a3.id =u.cityId
+		<include refid="userwhere"></include>
+		order by id desc
+	</select>
+
+	<update id="updateErrorCount">
+			update  t_user set errorTime = now(),errorCount=#{errorCount}  where id =#{id}
+	</update>
+
+	<select id="findByName" resultType="com.fh.shop.po.user.User">
+		select userName from t_user where userName =#{userName}
+	</select>
+
+	<!--修改密码-->
+	<update id="updatePassword">
+		update  t_user set password =#{newPassword}  where id=#{userId}
+	</update>
+	<!--解除用户锁定-->
+	<update id="updateLock">
+		update t_user set errorCount = 0 where id =#{id}
+	</update>
+
+	<!--重置密码-->
+	<update id="resetPassword">
+		update t_user set password=#{password}  where id =#{id}
+	</update>
+	<select id="sendPasswordByEmail" resultType="com.fh.shop.po.user.User">
+		select id,username,realname,password,age,sex,phone,email,pay,entryTime,photo,errorTime,errorCount,salt
+		 from t_user where email = #{email}
+	</select>
+
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC  
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+   
+<mapper namespace="com.fh.shop.mapper.resource.IResourceMapper">
+
+   <!-- &lt;!&ndash;查询树&ndash;&gt;
+    <select id="resourceList" resultType="com.fh.shop.po.resource.Resource">
+        select id,menuName, pid,menuType,menuUrl from t_resource
+    </select>
+
+    <insert id="addResource">
+        <selectKey  keyProperty="id"  resultType="long" order="AFTER">
+            select last_insert_id();
+        </selectKey>
+        insert into  t_resource (menuName,pid,menuType,menuUrl) values(#{menuName},#{pid},#{menuType},#{menuUrl})
+    </insert>
+    <delete id="deleteResource">
+        delete from t_resource where id in
+        <foreach collection="list" item="list" open="(" close=")"  separator=",">
+            #{list}
+        </foreach>
+    </delete>
+
+    <update id="updateResource">
+        update t_Resource set menuname = #{menuName},menuType=#{menuType},menuUrl=#{menuUrl} where  id= #{id}
+    </update>-->
+
+    <!--根据用户查询对应的菜单-->
+    <select id="menuList" resultType="com.fh.shop.po.resource.Resource">
+        select distinct re.id id,menuName, fatherId,menuType,menuUrl from  t_user_role ur
+        left join t_role_resource rr on ur.roleid = rr.roleid
+        left join t_resource re on re.id =rr.resourceid
+        where ur.userid =#{v} And  re.menutype=1
+
+    </select>
+
+
+    <select id="allmenuList" resultType="com.fh.shop.po.resource.Resource">
+         select distinct re.id id,menuName, fatherId,menuType,menuUrl from  t_user_role ur
+        left join t_role_resource rr on ur.roleid = rr.roleid
+        left join t_resource re on re.id =rr.resourceid
+        where ur.userid =#{v}
+    </select>
+
+    <delete id="deleteResourceByid">
+        delete from t_role_resource where resourceid in
+        <foreach collection="list" item="list" open="(" close=")"  separator=",">
+            #{list}
+        </foreach>
+    </delete>
+</mapper>

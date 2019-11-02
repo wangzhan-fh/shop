@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC  
+    "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+   
+<mapper namespace="com.fh.shop.mapper.role.IRoleMapper">
+	<select id="findList" resultType="com.fh.shop.po.role.Role">
+		select id,roleName from t_role
+	</select>
+
+	<!--查询总条数-->
+	<select id="findRoleByCount" resultType="java.lang.Long">
+        select count(*) from t_role
+    </select>
+	<!--查询当前页数据-->
+	<select id="findRoleByList" parameterType="com.fh.shop.po.role.Role" resultType="com.fh.shop.po.role.Role">
+        select t.* from (
+            select id,roleName from t_role
+            order by id desc
+        )t
+        limit #{start},#{length}
+    </select>
+
+	<!--添加角色-->
+	<insert id="addRole" parameterType="com.fh.shop.po.role.Role">
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            select last_insert_id();
+        </selectKey>
+        insert into t_role(roleName)
+        values (#{roleName})
+    </insert>
+
+	<!--修改角色-->
+	<update id="updateRole" parameterType="com.fh.shop.po.role.Role">
+        update t_role
+        set roleName = #{roleName}
+        where id = #{id}
+    </update>
+
+	<!--回显角色-->
+	<select id="toUpdateRole" parameterType="java.lang.Integer" resultType="com.fh.shop.po.role.Role">
+        select id,roleName from t_role
+        where id = #{id}
+    </select>
+
+	<!--删除角色-->
+	<delete id="deleteRole" parameterType="java.lang.Integer">
+        delete from t_role
+        where id = #{id}
+    </delete>
+    <!--删除角色对性的菜单id-->
+    <delete id="deleteResourceId" parameterType="java.lang.Integer">
+        delete from t_role_resource
+        where roleid = #{id}
+    </delete>
+    <!--根据角色查询用户-->
+    <select id="findUserId" resultType="com.fh.shop.po.user.UserRole">
+        select userid from t_user_role where roleid=#{id}
+    </select>
+	<!--查询所有-->
+	<select id="findRoleCheckbox" resultType="com.fh.shop.po.role.Role">
+        select id,roleName from t_role
+    </select>
+
+    <!-- 新增角色菜单中间表-->
+    <insert id="addRoleResource">
+        insert into t_role_resource (roleId,resourceId) values
+        <foreach collection="list" separator="," item="list">
+              (#{list.roleId},#{list.resourceId})
+        </foreach>
+    </insert>
+
+    <!-- 查看中间表菜单-->
+    <select id="findResourceIds" resultType="int">
+        select resourceId from t_role_resource where roleId = #{id}
+    </select>
+
+    <!--删除资源-->
+    <delete id="deleteResource">
+        delete from t_role_resource
+        where roleid = #{id}
+    </delete>
+</mapper>
